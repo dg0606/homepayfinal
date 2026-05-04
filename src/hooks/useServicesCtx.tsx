@@ -26,10 +26,39 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEYS.SERVICES);
     if (stored) {
-      setServices(JSON.parse(stored));
+      let services = JSON.parse(stored) as Service[];
+      services = autoResetRecurring(services);
+      setServices(services);
     }
     setIsLoading(false);
   }, []);
+
+  const autoResetRecurring = (services: Service[]): Service[] => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let changed = false;
+    const updated = services.map((s) => {
+      if (s.recurrence && s.isPaid && s.nextDueDate) {
+        const nextDue = new Date(s.nextDueDate);
+        if (nextDue < today) {
+          changed = true;
+          return {
+            ...s,
+            dueDate: s.nextDueDate,
+            isPaid: false,
+            paidBy: undefined,
+            paidDate: undefined,
+            nextDueDate: undefined,
+          };
+        }
+      }
+      return s;
+    });
+    if (changed) {
+      localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(updated));
+    }
+    return updated;
+  };
 
   const addService = useCallback((service: Omit<Service, "id">) => {
     const newService: Service = {
@@ -64,7 +93,6 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
     setServices((prev) => {
       const updated = prev.map((s) => {
         if (s.id !== id) return s;
-        const updatedService: Service = { ...s, isPaid: true, paidBy, paidDate };
         if (recurrence) {
           const nextDue = new Date(s.dueDate);
           switch (recurrence) {
@@ -72,12 +100,15 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
             case "bimestral": nextDue.setMonth(nextDue.getMonth() + 2); break;
             case "trimestral": nextDue.setMonth(nextDue.getMonth() + 3); break;
           }
-          updatedService.dueDate = nextDue.toISOString().split("T")[0];
-          updatedService.isPaid = false;
-          updatedService.paidBy = undefined;
-          updatedService.paidDate = undefined;
+          return {
+            ...s,
+            isPaid: true,
+            paidBy,
+            paidDate,
+            nextDueDate: nextDue.toISOString().split("T")[0],
+          };
         }
-        return updatedService;
+        return { ...s, isPaid: true, paidBy, paidDate };
       });
       localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(updated));
       return updated;

@@ -31,6 +31,9 @@ export function ServiceCard({ service, onPress }: ServiceCardProps) {
         <div className="service-due">
           Vence: {formatDate(service.dueDate)}
           {service.paidBy && <span> · Pagado por {service.paidBy}</span>}
+          {service.isPaid && service.nextDueDate && (
+            <span className="next-due-info"> · Próximo: {formatDate(service.nextDueDate)}</span>
+          )}
         </div>
       </div>
       <div style={{ textAlign: "right" }}>

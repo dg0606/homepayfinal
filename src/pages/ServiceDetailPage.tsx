@@ -70,6 +70,11 @@ export function ServiceDetailPage() {
               Pagado por {service.paidBy} el {formatDate(service.paidDate!)}
             </div>
           )}
+          {service.isPaid && service.nextDueDate && (
+            <div style={{ color: "var(--text-secondary)", marginTop: 4, fontSize: 14 }}>
+              Próximo vencimiento: {formatDate(service.nextDueDate)}
+            </div>
+          )}
           {service.recurrence && (
             <div
               className="badge badge-primary"

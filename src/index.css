@@ -186,6 +186,11 @@ body {
   margin-bottom: 2px;
 }
 
+.next-due-info {
+  color: var(--secondary);
+  font-weight: 500;
+}
+
 .service-due {
   font-size: 13px;
   color: var(--text-secondary);

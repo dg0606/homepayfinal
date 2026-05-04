@@ -13,6 +13,7 @@ export interface Service {
   paidBy?: string;
   paidDate?: string;
   recurrence: Recurrence;
+  nextDueDate?: string;
 }
 
 export interface Payment {
