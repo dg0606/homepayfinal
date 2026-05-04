@@ -9,7 +9,7 @@ export function AddReminderPage() {
   const { addReminder } = useRemindersCtx();
   const { services } = useServicesCtx();
   const { showToast } = useToast();
-  const { scheduleReminder } = useNotificationsCtx();
+  const { scheduleReminder, isWeb } = useNotificationsCtx();
 
   const [serviceId, setServiceId] = useState("");
   const [time, setTime] = useState("09:00");
@@ -36,6 +36,13 @@ export function AddReminderPage() {
     <div className="app-container">
       <Header title="Nuevo Recordatorio" onBack={() => navigate("/reminders")} />
       <div className="page-content">
+        {isWeb && (
+          <div className="card" style={{ padding: "14px 16px", marginBottom: 12, background: "var(--warning)", color: "#fff" }}>
+            <div style={{ fontSize: 14, fontWeight: 500 }}>
+              En la versión web las notificaciones no se dispararán
+            </div>
+          </div>
+        )}
         <div className="input-group">
           <label className="input-label">Servicio (opcional)</label>
           <select

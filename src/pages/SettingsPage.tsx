@@ -84,13 +84,22 @@ export function SettingsPage() {
         </div>
 
         <div className="section-title">Notificaciones</div>
+        {settings.notificationsEnabled && permissionStatus === "unavailable" && (
+          <div className="card" style={{ padding: "14px 16px", marginBottom: 12, background: "var(--warning)", color: "#fff" }}>
+            <div style={{ fontSize: 14, fontWeight: 500 }}>
+              Las notificaciones solo están disponibles en la app nativa (iOS/Android)
+            </div>
+          </div>
+        )}
         <div className="card" style={{ padding: 0 }}>
           <div className="list-item" style={{ padding: "14px 16px" }}>
             <span style={{ fontSize: 22 }}>📳</span>
             <div className="list-item-content">
               <div className="list-item-title">Activar notificaciones</div>
               <div className="list-item-subtitle">
-                {permissionStatus === "denied"
+                {permissionStatus === "unavailable"
+                  ? "No disponible en la versión web"
+                  : permissionStatus === "denied"
                   ? "Permiso denegado (configura en iOS)"
                   : permissionStatus === "granted"
                   ? "Recibir alertas de pagos"
@@ -100,6 +109,8 @@ export function SettingsPage() {
             <button
               className={`toggle ${settings.notificationsEnabled ? "active" : ""}`}
               onClick={handleNotificationToggle}
+              disabled={permissionStatus === "unavailable"}
+              style={{ opacity: permissionStatus === "unavailable" ? 0.4 : 1, cursor: permissionStatus === "unavailable" ? "not-allowed" : "pointer" }}
             />
           </div>
 
@@ -124,14 +135,16 @@ export function SettingsPage() {
 
           <div
             className="list-item"
-            style={{ padding: "14px 16px", cursor: "pointer" }}
-            onClick={handleTestNotification}
+            style={{ padding: "14px 16px", cursor: permissionStatus === "unavailable" ? "not-allowed" : "pointer", opacity: permissionStatus === "unavailable" ? 0.4 : 1 }}
+            onClick={() => {
+              if (permissionStatus !== "unavailable") handleTestNotification();
+            }}
           >
             <span style={{ fontSize: 22 }}>🧪</span>
             <div className="list-item-content">
               <div className="list-item-title">Probar notificación</div>
               <div className="list-item-subtitle">
-                Enviar una prueba en 5 segundos
+                {permissionStatus === "unavailable" ? "No disponible en web" : "Enviar una prueba en 5 segundos"}
               </div>
             </div>
             <span style={{ color: "var(--text-secondary)" }}>→</span>

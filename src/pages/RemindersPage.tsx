@@ -8,7 +8,7 @@ export function RemindersPage() {
   const { reminders, toggleReminder, deleteReminder } = useRemindersCtx();
   const { services } = useServicesCtx();
   const { showToast } = useToast();
-  const { scheduleReminder, cancelReminder } = useNotificationsCtx();
+  const { scheduleReminder, cancelReminder, isWeb } = useNotificationsCtx();
   const { settings } = useSettingsCtx();
 
   const getServiceName = (serviceId?: string) => {
@@ -61,6 +61,13 @@ export function RemindersPage() {
         onBack={() => navigate("/settings")}
       />
       <div className="page-content">
+        {isWeb && (
+          <div className="card" style={{ padding: "14px 16px", marginBottom: 12, background: "var(--warning)", color: "#fff" }}>
+            <div style={{ fontSize: 14, fontWeight: 500 }}>
+              Los recordatorios se guardan pero las notificaciones solo funcionan en la app nativa
+            </div>
+          </div>
+        )}
         {reminders.length === 0 ? (
           <EmptyState
             icon="🔔"

@@ -52,6 +52,8 @@ export interface AppSettings {
 
 export type FilterStatus = "todos" | "pendientes" | "pagados" | "atrasados";
 
+export type NotificationPermissionStatus = "granted" | "denied" | "prompt" | "unknown" | "unavailable";
+
 export interface MonthlyStats {
   totalPaid: number;
   totalPending: number;

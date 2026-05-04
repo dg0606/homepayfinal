@@ -10,7 +10,7 @@ export function EditReminderPage() {
   const { reminders, updateReminder } = useRemindersCtx();
   const { services } = useServicesCtx();
   const { showToast } = useToast();
-  const { scheduleReminder, cancelReminder } = useNotificationsCtx();
+  const { scheduleReminder, cancelReminder, isWeb } = useNotificationsCtx();
 
   const reminder = reminders.find((r) => r.id === id);
 
@@ -66,6 +66,13 @@ export function EditReminderPage() {
     <div className="app-container">
       <Header title="Editar Recordatorio" onBack={() => navigate("/reminders")} />
       <div className="page-content">
+        {isWeb && (
+          <div className="card" style={{ padding: "14px 16px", marginBottom: 12, background: "var(--warning)", color: "#fff" }}>
+            <div style={{ fontSize: 14, fontWeight: 500 }}>
+              En la versión web las notificaciones no se dispararán
+            </div>
+          </div>
+        )}
         <div className="input-group">
           <label className="input-label">Servicio (opcional)</label>
           <select

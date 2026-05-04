@@ -1,9 +1,11 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
-import { Reminder, Service } from "../models";
+import { Reminder, Service, NotificationPermissionStatus } from "../models";
+import { isNativePlatform } from "../utils/platform";
 
 interface NotificationsContextType {
   permissionGranted: boolean;
-  permissionStatus: "granted" | "denied" | "prompt" | "unknown";
+  permissionStatus: NotificationPermissionStatus;
+  isWeb: boolean;
   requestPermission: () => Promise<boolean>;
   scheduleReminder: (reminder: Reminder, services?: Service[]) => Promise<void>;
   cancelReminder: (reminderId: string) => Promise<void>;
@@ -22,11 +24,16 @@ export function useNotificationsCtx() {
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [permissionGranted, setPermissionGranted] = useState(false);
-  const [permissionStatus, setPermissionStatus] = useState<"granted" | "denied" | "prompt" | "unknown">("unknown");
+  const [permissionStatus, setPermissionStatus] = useState<NotificationPermissionStatus>("unknown");
+  const isWeb = !isNativePlatform();
 
   useEffect(() => {
+    if (isWeb) {
+      setPermissionStatus("unavailable");
+      return;
+    }
     checkPermissions();
-  }, []);
+  }, [isWeb]);
 
   const checkPermissions = async () => {
     try {
@@ -47,6 +54,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   };
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
+    if (isWeb) return false;
     try {
       const { LocalNotifications } = await import("@capacitor/local-notifications");
       const result = await LocalNotifications.requestPermissions();
@@ -62,10 +70,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     } catch {
       return false;
     }
-  }, []);
+  }, [isWeb]);
 
   const scheduleReminder = useCallback(async (reminder: Reminder, services?: Service[]) => {
-    if (!permissionGranted || !reminder.isActive) return;
+    if (isWeb || !permissionGranted || !reminder.isActive) return;
 
     try {
       const { LocalNotifications } = await import("@capacitor/local-notifications");
@@ -100,9 +108,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       console.warn("Failed to schedule notification:", e);
     }
-  }, [permissionGranted]);
+  }, [isWeb, permissionGranted]);
 
   const cancelReminder = useCallback(async (reminderId: string) => {
+    if (isWeb) return;
     try {
       const { LocalNotifications } = await import("@capacitor/local-notifications");
       const id = reminderId.charCodeAt(0) + reminderId.charCodeAt(reminderId.length - 1);
@@ -110,9 +119,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       console.warn("Failed to cancel notification:", e);
     }
-  }, []);
+  }, [isWeb]);
 
   const cancelAllReminders = useCallback(async () => {
+    if (isWeb) return;
     try {
       const { LocalNotifications } = await import("@capacitor/local-notifications");
       const pending = await LocalNotifications.getPending();
@@ -122,7 +132,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       console.warn("Failed to cancel all notifications:", e);
     }
-  }, []);
+  }, [isWeb]);
 
   const rescheduleReminders = useCallback(async (reminders: Reminder[], services?: Service[]) => {
     await cancelAllReminders();
@@ -134,6 +144,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   }, [cancelAllReminders, scheduleReminder]);
 
   const fireTestNotification = useCallback(async () => {
+    if (isWeb) return;
     if (!permissionGranted) {
       const granted = await requestPermission();
       if (!granted) return;
@@ -160,13 +171,14 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       console.warn("Failed to fire test notification:", e);
     }
-  }, [permissionGranted, requestPermission]);
+  }, [isWeb, permissionGranted, requestPermission]);
 
   return (
     <NotificationsContext.Provider
       value={{
         permissionGranted,
         permissionStatus,
+        isWeb,
         requestPermission,
         scheduleReminder,
         cancelReminder,
