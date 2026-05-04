@@ -90,6 +90,7 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const markAsPaid = useCallback((id: string, paidBy: string, paidDate: string, recurrence: Service["recurrence"]) => {
+    const payer = paidBy || "Yo";
     setServices((prev) => {
       const updated = prev.map((s) => {
         if (s.id !== id) return s;
@@ -103,12 +104,12 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
           return {
             ...s,
             isPaid: true,
-            paidBy,
+            paidBy: payer,
             paidDate,
             nextDueDate: nextDue.toISOString().split("T")[0],
           };
         }
-        return { ...s, isPaid: true, paidBy, paidDate };
+        return { ...s, isPaid: true, paidBy: payer, paidDate };
       });
       localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(updated));
       return updated;

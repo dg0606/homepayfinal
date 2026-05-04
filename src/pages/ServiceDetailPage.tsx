@@ -1,19 +1,18 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Header, ServiceIcon } from "../components";
 import { useServicesCtx, usePaymentsCtx, useMembersCtx, useToast } from "../hooks";
-import { Service } from "../models";
 import { formatCurrency, formatDate } from "../utils";
 
 export function ServiceDetailPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const service: Service = location.state?.service;
-
-  const { markAsPaid, deleteService } = useServicesCtx();
+  const { id } = useParams<{ id: string }>();
+  const { services, markAsPaid, deleteService } = useServicesCtx();
   const { addPayment } = usePaymentsCtx();
   const { members } = useMembersCtx();
   const { showToast } = useToast();
+
+  const service = services.find((s) => s.id === id);
 
   const [paidBy, setPaidBy] = useState("");
   const [paidDate, setPaidDate] = useState(
@@ -27,10 +26,12 @@ export function ServiceDetailPage() {
   }
 
   const handleMarkPaid = () => {
-    if (!paidBy || !paidDate) return;
+    if (!paidDate) return;
 
-    addPayment(service, paidBy, paidDate);
-    markAsPaid(service.id, paidBy, paidDate, service.recurrence);
+    const payer = paidBy || "Yo";
+
+    addPayment(service, payer, paidDate);
+    markAsPaid(service.id, payer, paidDate, service.recurrence);
     showToast("Pago registrado", "success");
     navigate("/");
   };
@@ -104,13 +105,13 @@ export function ServiceDetailPage() {
                 </h3>
 
                 <div className="input-group">
-                  <label className="input-label">Quién realizó el pago</label>
+                  <label className="input-label">Quién realizó el pago (opcional)</label>
                   <select
                     className="select"
                     value={paidBy}
                     onChange={(e) => setPaidBy(e.target.value)}
                   >
-                    <option value="">Seleccionar...</option>
+                    <option value="">Yo</option>
                     {members.map((m) => (
                       <option key={m.id} value={m.name}>
                         {m.name}
@@ -139,7 +140,7 @@ export function ServiceDetailPage() {
                   <button
                     className="btn btn-primary"
                     onClick={handleMarkPaid}
-                    disabled={!paidBy || !paidDate}
+                    disabled={!paidDate}
                   >
                     Confirmar
                   </button>

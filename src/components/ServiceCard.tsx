@@ -21,6 +21,9 @@ export function ServiceCard({ service, onPress }: ServiceCardProps) {
       statusClass = "status-pending";
       statusText = "Pendiente";
     }
+  } else if (service.nextDueDate) {
+    statusClass = "status-al-corriente";
+    statusText = `Al corriente · Próximo: ${formatDate(service.nextDueDate)}`;
   }
 
   return (
@@ -31,9 +34,6 @@ export function ServiceCard({ service, onPress }: ServiceCardProps) {
         <div className="service-due">
           Vence: {formatDate(service.dueDate)}
           {service.paidBy && <span> · Pagado por {service.paidBy}</span>}
-          {service.isPaid && service.nextDueDate && (
-            <span className="next-due-info"> · Próximo: {formatDate(service.nextDueDate)}</span>
-          )}
         </div>
       </div>
       <div style={{ textAlign: "right" }}>

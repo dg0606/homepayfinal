@@ -186,11 +186,6 @@ body {
   margin-bottom: 2px;
 }
 
-.next-due-info {
-  color: var(--secondary);
-  font-weight: 500;
-}
-
 .service-due {
   font-size: 13px;
   color: var(--text-secondary);
@@ -224,6 +219,11 @@ body {
 .status-overdue {
   background: rgba(244, 67, 54, 0.15);
   color: var(--overdue);
+}
+
+.status-al-corriente {
+  background: rgba(33, 150, 243, 0.15);
+  color: var(--primary);
 }
 
 .badge {

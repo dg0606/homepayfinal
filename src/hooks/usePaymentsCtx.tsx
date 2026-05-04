@@ -36,7 +36,7 @@ export function PaymentsProvider({ children }: { children: ReactNode }) {
       serviceName: service.name,
       serviceType: service.type,
       amount: service.amount,
-      paidBy,
+      paidBy: paidBy || "Yo",
       paidDate,
       dueDate: service.dueDate,
       status: "pagado",
